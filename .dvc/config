@@ -1,0 +1,5 @@
+[core]
+    remote = ssh-storage
+['remote "ssh-storage"']
+    url = ssh://xamicus@xamco.net/home/xamicus/git.xamco.net/DataVersion/dlops01
+    user = xamicus
