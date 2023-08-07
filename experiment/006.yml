@@ -1,0 +1,22 @@
+logger: WandbLogger
+logger_params:
+  project: dlops-mnist
+  name: "Experiment 006"
+callbacks:
+  - name: WandBCallback
+    lib: src.utils
+    params:
+      labels:
+        - "no 3"
+        - "3"
+  - name: ModelCheckPoint
+    lib: pytorch_lightning.callbacks
+    params:
+      dirpatch: checkpoints
+      filename: "006"
+      save_top_k: 1
+      monitor: val_loss
+      mode: min
+
+trainer:
+  enable_checkpointing: True
