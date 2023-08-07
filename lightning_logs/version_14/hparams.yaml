@@ -1,0 +1,9 @@
+datamodule:
+  path: !!python/object/apply:pathlib.PosixPath
+  - dataset
+  batch_size: 64
+trainer:
+  max_epochs: 20
+  logger: null
+  enable_checkpointing: false
+  overfit_batches: 0

@@ -5,6 +5,7 @@ from pathlib import Path
 import pytorch_lightning as pl
 import yaml
 import sys
+from pytorch_lightning.loggers import TensorBoardLogger
 
 # path = Path('dataset')
 # dm = MNISTDataModule( path, batch_size = 25 )
@@ -51,9 +52,10 @@ config = {
 
 def train(config):
     dm = MNISTDataModule( **config['datamodule'] )
-    module = MNISTModule()
+    module = MNISTModule(config)
     trainer = pl.Trainer( **config['trainer'] )
     trainer.fit( module, dm )
+    trainer.save_checkpoint( 'final.ckpt' )
 
 if __name__ == '__main__':
     if len( sys.argv ) > 1:
