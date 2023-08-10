@@ -69,6 +69,8 @@ def train(config):
             if callback[ 'name' ] == 'WandBCallback':
                 dm.setup()
                 callback[ 'params' ][ 'dl' ] = dm.val_dataloader()
+            elif callback[ 'name' ] == 'ModelCheckpoint':
+                callback[ 'params' ][ 'filename' ] = f'{callback[ "params" ][ "filename" ]}-{{val_loss:.5f}}-{{epoch}}'
             cb = getattr( importlib.import_module( callback[ 'lib' ] ), callback[ 'name' ] )( **callback[ 'params' ] )
             callbacks.append( cb )
             config[ 'trainer' ][ 'callbacks' ] = callbacks
@@ -76,7 +78,7 @@ def train(config):
 
     trainer = pl.Trainer( **config['trainer'] )
     trainer.fit( module, dm )
-    trainer.save_checkpoint( 'final.ckpt' )
+    trainer.save_checkpoint( 'checkpoints/final.ckpt' )
 
 if __name__ == '__main__':
     if len( sys.argv ) > 1:
