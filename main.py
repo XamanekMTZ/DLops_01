@@ -5,6 +5,7 @@ from pathlib import Path
 import pytorch_lightning as pl
 import yaml
 import sys
+import importlib
 from pytorch_lightning.loggers import TensorBoardLogger
 
 # path = Path('dataset')
@@ -44,15 +45,35 @@ config = {
     },
     'trainer': {
         'max_epochs': 10, 
-        'logger': None, 
         'enable_checkpointing': False,
         'overfit_batches': 0,
     },
+    'logger': None, 
+    'callbacks': None,
 }
 
 def train(config):
     dm = MNISTDataModule( **config['datamodule'] )
-    module = MNISTModule(config)
+    module = MNISTModule( config )
+    # configurar el logger
+    if config[ 'logger' ] is not None:
+        if config[ 'logger' ] == 'WandbLogger':
+            config[ 'trainer' ][ 'logger' ] = getattr( pl.loggers, config[ 'logger' ] )( **config[ 'logger_params' ], config = config )
+        else:
+            config[ 'trainer' ][ 'logger' ] = getattr( pl.loggers, config[ 'logger' ] )( **config[ 'logger_params' ] )
+
+    # Configurar callbacks
+    if config[ 'callbacks' ] is not None:
+        callbacks = []
+        for callback in config[ 'callbacks' ]:
+            if callback[ 'name' ] == 'WandBCallback':
+                dm.setup()
+                callback[ 'params' ][ 'dl' ] = dm.val_dataloader()
+            cb = getattr( importlib.import_module( callback[ 'lib' ] ), callback[ 'name' ] )( **callback[ 'params' ] )
+            callbacks.append( cb )
+            config[ 'trainer' ][ 'callbacks' ] = callbacks
+
+
     trainer = pl.Trainer( **config['trainer'] )
     trainer.fit( module, dm )
     trainer.save_checkpoint( 'final.ckpt' )
